@@ -357,11 +357,12 @@
             },
 
             place = function () {
-                var position = (component || element).position(),
-                    offset = (component || element).offset(),
+                var offset = (component || element).offset(),
                     vertical = options.widgetPositioning.vertical,
                     horizontal = options.widgetPositioning.horizontal,
-                    parent;
+                    parent,
+                    position;
+
 
                 if (options.widgetParent) {
                     parent = options.widgetParent.append(widget);
@@ -375,6 +376,11 @@
                     element.children().first().after(widget);
                 }
 
+                position = {
+                  left: (component || element).offset().left - $(parent).offset().left,
+                  top: (component || element).offset().top - $(parent).offset().top
+                };
+
                 // Top and bottom logic
                 if (vertical === 'auto') {
                     if (offset.top + widget.height() * 1.5 >= $(window).height() + $(window).scrollTop() &&
@@ -387,8 +393,10 @@
 
                 // Left and right logic
                 if (horizontal === 'auto') {
-                    if (parent.width() < offset.left + widget.outerWidth() / 2 &&
-                        offset.left + widget.outerWidth() > $(window).width()) {
+                    if ((parent.width() < offset.left + widget.outerWidth() / 2 &&
+                        offset.left + widget.outerWidth() < $(window).width()) ||
+                        offset.left - widget.outerWidth() < 0
+                       ) {
                         horizontal = 'right';
                     } else {
                         horizontal = 'left';
@@ -402,9 +410,9 @@
                 }
 
                 if (horizontal === 'right') {
-                    widget.addClass('pull-right');
-                } else {
                     widget.removeClass('pull-right');
+                } else {
+                    widget.addClass('pull-right');
                 }
 
                 // find the first parent element that has a relative css positioning
@@ -419,11 +427,10 @@
                 }
 
                 widget.css({
-                    top: vertical === 'top' ? 'auto' : position.top + element.outerHeight(),
-                    bottom: vertical === 'top' ? position.top + element.outerHeight() : 'auto',
-                    left: horizontal === 'left' ? parent.css('padding-left') : 'auto',
-                    right: horizontal === 'left' ? 'auto' : parent.width() - element.outerWidth()
+                  top: vertical === 'top' ? position.top - (component || element).outerHeight() / 2 - widget.outerHeight() : position.top + (component || element).outerHeight(),
+                  left: horizontal === 'left' ? position.left + (component || element).outerWidth() - widget.outerWidth() : position.left + (component || element).outerWidth() / 2
                 });
+
             },
 
             notifyEvent = function (e) {
