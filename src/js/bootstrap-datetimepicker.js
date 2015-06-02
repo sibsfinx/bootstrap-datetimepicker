@@ -376,6 +376,11 @@
                     element.children().first().after(widget);
                 }
 
+                position = {
+                  left: (component || element).offset().left - $(parent).offset().left,
+                  top: (component || element).offset().top - $(parent).offset().top
+                };
+
                 // Top and bottom logic
                 if (vertical === 'auto') {
                     if (offset.top + widget.height() * 1.5 >= $(window).height() + $(window).scrollTop() &&
@@ -388,8 +393,10 @@
 
                 // Left and right logic
                 if (horizontal === 'auto') {
-                    if (parent.width() < offset.left + widget.outerWidth() / 2 &&
-                        offset.left + widget.outerWidth() > $(window).width()) {
+                    if ((parent.width() < offset.left + widget.outerWidth() / 2 &&
+                        offset.left + widget.outerWidth() < $(window).width()) ||
+                        offset.left - widget.outerWidth() < 0
+                       ) {
                         horizontal = 'right';
                     } else {
                         horizontal = 'left';
@@ -419,15 +426,11 @@
                     throw new Error('datetimepicker component should be placed within a relative positioned container');
                 }
 
-                position = {
-                  left: (component || element).offset().left - $(parent).offset().left,
-                  top: (component || element).offset().top - $(parent).offset().top
-                };
-
                 widget.css({
-                  top: vertical === 'top' ? position.top - (component || element).outerHeight()/2 - widget.outerHeight() : position.top + (component || element).outerHeight(),
-                  left: horizontal === 'left' ? position.left + (component || element).outerWidth() - widget.outerWidth() : position.left + (component || element).outerWidth()/2
+                  top: vertical === 'top' ? position.top - (component || element).outerHeight() / 2 - widget.outerHeight() : position.top + (component || element).outerHeight(),
+                  left: horizontal === 'left' ? position.left + (component || element).outerWidth() - widget.outerWidth() : position.left + (component || element).outerWidth() / 2
                 });
+
             },
 
             notifyEvent = function (e) {
